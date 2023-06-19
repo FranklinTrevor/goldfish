@@ -1,10 +1,12 @@
 [Mesh]
     type = GeneratedMesh
-    dim = 2
+    dim = 3
     nx = 20
     ny = 20
+    nz = 20
     xmax = 10
     ymax = 10
+    zmax = 10
 []
 
 [Variables]
@@ -21,7 +23,7 @@
         type = ADHeatConductionTimeDerivative
         variable = Temp
         specific_heat = 0.47 #J/kg-C
-        density_name = 8000 #Kg/m^3
+        density_name = 2000 #Kg/m^3
     []
 []
 
@@ -36,14 +38,14 @@
     [t_wall]
         type = DirichletBC
         variable = Temp
-        value = 600
-        boundary = 'bottom top left right'
+        value = 800
+        boundary = 'bottom top left right front back'
     []
 []
 
 [Executioner]
     type = Transient
-    end_time = 300
+    end_time = 200
     dt = 1
     solve_type = 'NEWTON'
 []
@@ -53,18 +55,25 @@
         type = TransientMultiApp
         input_files = sub_TH.i
         execute_on = 'TIMESTEP_END'
-        positions = '5 5 0'
+        positions = '5 5 5'
     []
 []
 
 [Transfers]
-    [push_T]
+    [push_TWall]
         type = MultiAppNearestNodeTransfer
         to_multi_app = thm
         source_variable = Temp
         variable = T_wall
     []
+    [pull_T]
+        type = MultiAppNearestNodeTransfer
+        from_multi_app = thm
+        source_variable = T
+        variable = Temp
+    []
 []
+
 
 [Outputs]
     exodus = true

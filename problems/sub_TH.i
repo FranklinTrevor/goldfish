@@ -18,6 +18,15 @@
     []
 []
 
+[HeatStructureMaterials]
+    [mat]
+        type = SolidMaterialProperties
+        rho = 2000
+        k = 52
+        cp = 0.47
+    []
+[]
+
 [Closures]
     [simple_closures]
         type = Closures1PhaseSimple
@@ -41,16 +50,16 @@
         D_h = 1
         f = 1.6
     []
-    [core_ht]
-        type = HeatTransferFromExternalAppTemperature1Phase
-        flow_channel = core_chan
-        Hw = 100 #made up
-        initial_T_wall = 300
-    []
     [outlet]
         type = Outlet1Phase
         input = 'core_chan:out'
         p = 1e5
+    []
+    [core_ht]
+        type = HeatTransferFromSpecifiedTemperature1Phase
+        flow_channel = core_chan
+        T_wall = 300
+        Hw = 1.36
     []
 []
 
