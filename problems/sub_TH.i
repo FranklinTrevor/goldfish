@@ -1,84 +1,50 @@
-[GlobalParams]
-    initial_p = 1e5
-    initial_vel = 0
-    initial_T = 300
-
-    rdg_slope_reconstruction = full
-    closures = simple_closures
-    fp = he
-[]
-
-[FluidProperties]
-    [he]
-        type = IdealGasFluidProperties
-        molar_mass = 4e-3
-        gamma = 1.67
-        k = 0.2556
-        mu = 3.22639e-5
-    []
-[]
-
 [HeatStructureMaterials]
-    [mat]
+    [ss316]
         type = SolidMaterialProperties
-        rho = 2000
-        k = 52
-        cp = 0.47
-    []
-[]
-
-[Closures]
-    [simple_closures]
-        type = Closures1PhaseSimple
+        rho = 8.0272e3
+        cp = 502.1
+        k = 16.26
     []
 []
 
 [Components]
-    [inlet]
-        type = InletMassFlowRateTemperature1Phase
-        input = 'core_chan:in'
-        m_dot = 1e-4
-        T = 300
-    []
-    [core_chan]
-        type = FlowChannel1Phase
-        position = '5 5 0'
-        orientation = '0 0 1'
+    [hs]
+        type = HeatStructureCylindrical
+        orientation = '1 0 0'
+        position = '0 0 0'
         length = 10
-        n_elems = 20
-        A = 0.785
-        D_h = 1
-        f = 1.6
+        n_elems = 10
+
+        inner_radius = 0.1
+        widths = '0.5'
+        n_part_elems = '10'
+        materials = 'ss316'
+        names = 'region'
+
+        initial_T = 300
     []
-    [outlet]
-        type = Outlet1Phase
-        input = 'core_chan:out'
-        p = 1e5
-    []
-    [core_ht]
-        type = HeatTransferFromSpecifiedTemperature1Phase
-        flow_channel = core_chan
-        T_wall = 300
-        Hw = 1.36
+
+    [ext_temperature]
+        type = HSBoundaryExternalAppTemperature
+        boundary = 'hs:outer'
+        hs = hs
     []
 []
 
 [Executioner]
     type = Transient
-    start_time = 0
-    end_time = 200
-    dt = 1
-  
-    line_search = basic
+    scheme = bdf2
+    dt = 0.1
+    abort_on_solve_fail = true
     solve_type = NEWTON
-  
-    nl_rel_tol = 1e-5
-    nl_abs_tol = 1e-5
-    nl_max_its = 5
+    line_search = basic
+
+    nl_rel_tol = 1e-7
 []
 
 [Outputs]
     exodus = true
+    show = 'T_ext'
 []
 
 

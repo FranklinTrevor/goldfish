@@ -1,80 +1,90 @@
 [Mesh]
     type = GeneratedMesh
-    dim = 3
-    nx = 20
-    ny = 20
-    nz = 20
+    dim = 1
     xmax = 10
-    ymax = 10
-    zmax = 10
+    nx = 10
+[]
+
+[Functions]
+    [T_bc_fn]
+        type = ParsedFunction
+        expression = '300+t*x*10'
+    []
+    [T_ffn]
+        type = ParsedFunction
+        expression = 'x*10'
+    []
 []
 
 [Variables]
-    [Temp]
+    [T]
+    []
+[]
+
+[ICs]
+    [T_ic]
+        type = ConstantIC
+        variable = T
+        value = 300
     []
 []
 
 [Kernels]
-    [heat_conduction]
-        type = ADHeatConduction
-        variable = Temp
+    [td]
+        type = ADTimeDerivative
+        variable = T
     []
-    [time_derivative]
-        type = ADHeatConductionTimeDerivative
-        variable = Temp
-        specific_heat = 0.47 #J/kg-C
-        density_name = 2000 #Kg/m^3
+
+    [diff]
+        type = ADDiffusion
+        variable = T
+    []
+
+    [fnn]
+        type = BodyForce
+        variable = T
+        function = T_ffn
     []
 []
 
-[Materials]
-    [heat_conduction]
-        type = ADHeatConductionMaterial
-        thermal_conductivity = 52 #W/m-k
-    []
-[]
-  
 [BCs]
-    [t_wall]
-        type = DirichletBC
-        variable = Temp
-        value = 800
-        boundary = 'bottom top left right front back'
+    [left]
+        type = FunctionDirichletBC
+        variable = T
+        boundary = 'left right'
+        function = T_bc_fn
     []
 []
 
 [Executioner]
     type = Transient
-    end_time = 200
-    dt = 1
-    solve_type = 'NEWTON'
+    dt = 0.1
+    num_steps = 2
+    nl_abs_tol = 1e-10
+    abort_on_solve_fail = true
+    solve_type = NEWTON
 []
 
 [MultiApps]
     [thm]
         type = TransientMultiApp
+        app_type = ThermalHydraulicsApp
         input_files = sub_TH.i
-        execute_on = 'TIMESTEP_END'
-        positions = '5 5 5'
+        execute_on = 'initial timestep_end'
     []
 []
 
 [Transfers]
-    [push_TWall]
+    [T_to_thm]
         type = MultiAppNearestNodeTransfer
         to_multi_app = thm
-        source_variable = Temp
-        variable = T_wall
-    []
-    [pull_T]
-        type = MultiAppNearestNodeTransfer
-        from_multi_app = thm
         source_variable = T
-        variable = Temp
+        variable = T_ext
+        target_boundary = 'hs:outer'
     []
 []
 
-
 [Outputs]
     exodus = true
+    show = 'T'
 []
